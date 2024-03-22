@@ -181,6 +181,42 @@ window.onload = function () {
     }
   }
 
+  function isEnemyAt(x, y) {
+    return map[y][x] === 'tileE';
+  }
+
+  function canMoveTo(x, y) {
+    const tile = map[y][x];
+    return (
+      x >= 0 &&
+      x < fieldWidth &&
+      y >= 0 &&
+      y < fieldHeight &&
+      (tile !== 'tileW')
+    );
+  }
+
+  function moveHeroTo(x, y) {
+    map[hero.y][hero.x] = 'tile';
+    hero.x = x;
+    hero.y = y;
+    map[y][x] = 'tileP';
+  }
+
+  function attackEnemies() {
+    for (const enemy of enemies) {
+      if (isEnemyNear(enemy)) {
+        enemy.health -= hero.attack; 
+        if (enemy.health <= 0) {
+          const index = enemies.indexOf(enemy);
+          enemies.splice(index, 1);
+          map[enemy.y][enemy.x] = 'tile';
+        }
+        break;
+      }
+    }
+  }
+
   $(document).keydown(function (e) {
     let x = hero.x;
     let y = hero.y;
@@ -239,44 +275,19 @@ window.onload = function () {
     }
   });
 
-  function isEnemyAt(x, y) {
-    return map[y][x] === 'tileE';
-  }
-
-  function canMoveTo(x, y) {
-    const tile = map[y][x];
-    return (
-      x >= 0 &&
-      x < fieldWidth &&
-      y >= 0 &&
-      y < fieldHeight &&
-      (tile !== 'tileW')
-    );
-  }
-
-  function moveHeroTo(x, y) {
-    map[hero.y][hero.x] = 'tile';
-    hero.x = x;
-    hero.y = y;
-    map[y][x] = 'tileP';
-  }
-
-  function attackEnemies() {
-    for (const enemy of enemies) {
-      if (isEnemyNear(enemy)) {
-        enemy.health -= hero.attack; 
-        if (enemy.health <= 0) {
-          const index = enemies.indexOf(enemy);
-          enemies.splice(index, 1);
-          map[enemy.y][enemy.x] = 'tile';
-        }
-        break;
-      }
-    }
-  }
-
   function isEnemyNear(enemy) {
     return Math.abs(hero.x - enemy.x) + Math.abs(hero.y - enemy.y) === 1;
+  }
+
+  function isSwordOrHealthPotion(x, y) {
+    return map[y][x] === 'tileSW' || map[y][x] === 'tileHP';
+  }
+
+  function isEnemyNearToHero(enemyX, enemyY) {
+    return (
+      (Math.abs(hero.x - enemyX) === 1 && hero.y === enemyY) ||
+      (Math.abs(hero.y - enemyY) === 1 && hero.x === enemyX)
+    );
   }
 
   function moveEnemies() {
@@ -316,16 +327,6 @@ window.onload = function () {
     }
   }
 
-  function isSwordOrHealthPotion(x, y) {
-    return map[y][x] === 'tileSW' || map[y][x] === 'tileHP';
-  }
-
-  function isEnemyNearToHero(enemyX, enemyY) {
-    return (
-      (Math.abs(hero.x - enemyX) === 1 && hero.y === enemyY) ||
-      (Math.abs(hero.y - enemyY) === 1 && hero.x === enemyX)
-    );
-  }
 
   setInterval(function () {
     moveEnemies();
